@@ -1,0 +1,15 @@
+{
+  "name": "whack-egg-online-server",
+  "version": "1.0.0",
+  "description": "戳蛋大作戰 連線多人版 - WebSocket 伺服器(權威判定)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
