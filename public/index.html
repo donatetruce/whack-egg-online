@@ -204,6 +204,39 @@
 
   .conn-badge { position: fixed; top: 10px; right: 14px; font-size: 11px; padding: 3px 10px; border-radius: 10px;
     background: rgba(0,0,0,0.15); color: #3A3226; font-weight: 700; }
+
+  /* 說明按鈕與浮層 */
+  .info-btn {
+    display: inline-block; background: var(--panel-light); color: #6b5c46;
+    border: 2px solid var(--egg-line); border-radius: 20px;
+    padding: 8px 20px; font-size: 13px; font-weight: 800; cursor: pointer; margin: 6px;
+  }
+  .hud-info-btn {
+    background: var(--panel-light); border: 2px solid var(--egg-line); border-radius: 12px;
+    padding: 4px 10px; font-size: 13px; font-weight: 800; cursor: pointer; margin-top: 4px;
+  }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(58,50,38,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50; padding: 16px;
+  }
+  .modal-panel {
+    background: var(--egg-shell); border: 3px solid var(--egg-line); border-radius: 20px;
+    max-width: 480px; width: 100%; max-height: 85vh; overflow-y: auto;
+    padding: 20px 20px 16px; box-shadow: 0 10px 0 rgba(0,0,0,0.2);
+  }
+  .modal-panel h2 { margin: 0 0 12px; font-size: 20px; color: var(--accent-deep); }
+  .info-section { margin-bottom: 18px; }
+  .info-section h3 { font-size: 14px; margin: 0 0 8px; color: var(--ink); border-bottom: 2px solid #e8e2d6; padding-bottom: 4px; }
+  .info-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .info-demo-icon { position: relative; width: 54px; height: 58px; flex-shrink: 0; }
+  .info-text { font-size: 12.5px; color: #6b5c46; line-height: 1.6; }
+  .info-text b { color: var(--accent-deep); }
+  .modal-close-btn {
+    display: block; width: 100%; margin-top: 8px;
+    background: var(--accent-deep); color: #fff; border: none; border-radius: 16px;
+    padding: 12px; font-size: 15px; font-weight: 800; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -219,6 +252,49 @@
       <div class="sub">連線對戰版 · 兩人一房間</div>
       <button class="btn" id="btnGoCreate">建立房間</button>
       <button class="btn secondary" id="btnGoJoin">輸入代碼加入</button>
+      <div><button class="info-btn" id="infoBtn">📖 遊戲說明</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="infoModal" style="display:none;">
+    <div class="modal-panel">
+      <h2>📖 遊戲說明</h2>
+      <div class="info-section">
+        <h3>角色圖鑑</h3>
+        <div class="info-row">
+          <div class="info-demo-icon" id="demoEggNormal"></div>
+          <div class="info-text"><b>白色蛋</b>——正常的蛋,攻擊方<b>應該戳!</b>+10分。</div>
+        </div>
+        <div class="info-row">
+          <div class="info-demo-icon" id="demoEggDisguised"></div>
+          <div class="info-text"><b>石頭色的蛋</b>——外型還是蛋,只是被防守方的偽裝技能塗成石頭色騙人別戳。<b>底層是真的蛋,還是應該戳!</b></div>
+        </div>
+        <div class="info-row">
+          <div class="info-demo-icon" id="demoStoneNormal"></div>
+          <div class="info-text"><b>石頭</b>——正常的陷阱,<b>別戳!</b>誤觸扣15分(連擊中扣更多)。</div>
+        </div>
+        <div class="info-row">
+          <div class="info-demo-icon" id="demoStoneDisguised"></div>
+          <div class="info-text"><b>蛋色的石頭</b>——外型還是石頭,只是被塗成蛋的顏色引誘人點下去。<b>底層是真的石頭,千萬別戳!</b></div>
+        </div>
+        <div class="info-row">
+          <div class="info-demo-icon" id="demoToast"></div>
+          <div class="info-text"><b>吐司</b>——戳中後隨機觸發3秒<b>BUFF(+1倍分數)</b>或<b>DEBUFF(-1倍分數)</b>,是好是壞戳了才知道。</div>
+        </div>
+      </div>
+      <div class="info-section">
+        <h3>🥊 拔河計量表</h3>
+        <div class="info-text">畫面上那條綠橘漸層的長條就是它。攻擊方打中蛋/吐司會把指標推向右邊(🔨攻擊方),防守方蛋撐得越久、或誤導攻擊方打到石頭,指標會被推向左邊(🥚蛋方)。時間到時指標偏向哪邊,那邊就在這輪拔河贏了。</div>
+      </div>
+      <div class="info-section">
+        <h3>🔥 連擊(攻擊方技能)</h3>
+        <div class="info-text">按下啟動後,接下來的5次戳蛋/戳石頭套用倍率:<b>第N次戳中蛋得 10×N 分</b>,戳到石頭則<b>扣 15×N 分並立刻中斷</b>連擊。5次全過最多拿150分,失敗越早通常越不划算,是高風險高報酬的賭注玩法。<b>吐司不算在這5次裡</b>,可以放心戳。冷卻時間1秒。</div>
+      </div>
+      <div class="info-section">
+        <h3>🎭 偽裝(防守方技能)</h3>
+        <div class="info-text">按下後進入3秒瞄準模式,場上如果有正在預告的洞位(只有防守方看得到),點下去就能鎖定偽裝:真蛋塗成石頭色、真石頭塗成蛋色,騙攻擊方誤判。<b>外型不會變,只有顏色換掉</b>,攻擊方還是有機會靠外型抓破綻。冷卻時間1秒,3秒內沒鎖定成功一樣要重新冷卻。</div>
+      </div>
+      <button class="modal-close-btn" id="infoCloseBtn">關閉</button>
     </div>
   </div>
 
@@ -273,6 +349,7 @@
         <div class="stat-label" id="scoreLabel">分數</div>
         <div class="stat-value" id="scoreVal">0</div>
         <div class="mod-badge" id="modBadge"></div>
+        <button class="hud-info-btn" id="hudInfoBtn">📖</button>
       </div>
     </div>
 
@@ -359,6 +436,19 @@
   function sendMsg(obj) {
     if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
   }
+
+  // ---------- 說明彈窗 ----------
+  function renderInfoDemo() {
+    el('demoEggNormal').innerHTML = critterHTML('egg');
+    el('demoEggDisguised').innerHTML = critterHTML('egg', 'stone');
+    el('demoStoneNormal').innerHTML = critterHTML('stone');
+    el('demoStoneDisguised').innerHTML = critterHTML('stone', 'egg');
+    el('demoToast').innerHTML = critterHTML('toast');
+  }
+  function openInfoModal() { renderInfoDemo(); el('infoModal').style.display = 'flex'; }
+  el('infoBtn').addEventListener('click', openInfoModal);
+  el('hudInfoBtn').addEventListener('click', openInfoModal);
+  el('infoCloseBtn').addEventListener('click', () => { el('infoModal').style.display = 'none'; });
 
   // ---------- 首頁導覽 ----------
   el('btnGoCreate').addEventListener('click', () => showScreen('screenCreateRole'));
@@ -531,8 +621,10 @@
       const h = holes[i];
       if (!h) return;
       h.el.classList.toggle('up', hv.up);
-      if (hv.up && hv.displayType) {
-        h.critterEl.innerHTML = critterHTML(hv.displayType);
+      if (hv.up && hv.shape) {
+        // 外型(shape)永遠是真實種類,顏色(color)才會因偽裝而不同——兩者分開套用
+        const colorAs = (hv.color && hv.color !== hv.shape) ? hv.color : null;
+        h.critterEl.innerHTML = critterHTML(hv.shape, colorAs);
       } else if (!hv.up) {
         h.critterEl.innerHTML = '';
       }
@@ -615,10 +707,14 @@
       }
     }
 
-    // 事件(浮動分數文字,只有攻擊方會收到)
+    // 事件:浮動分數文字只有攻擊方會收到;防守方只收到「被打中」的動畫提示,不含分數數字
     (s.events || []).forEach(e => {
-      if (e.kind === 'float' && holes[e.idx]) {
+      if (!holes[e.idx]) return;
+      if (e.kind === 'float') {
         floatText(holes[e.idx], e.text, e.good);
+        holes[e.idx].el.classList.add('hit');
+        setTimeout(() => holes[e.idx].el.classList.remove('hit'), 150);
+      } else if (e.kind === 'hit') {
         holes[e.idx].el.classList.add('hit');
         setTimeout(() => holes[e.idx].el.classList.remove('hit'), 150);
       }
