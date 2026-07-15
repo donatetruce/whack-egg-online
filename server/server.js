@@ -118,7 +118,8 @@ function buildHolesView(room, role) {
     const up = room.activeSet.has(i);
     const view = {
       up,
-      displayType: up ? h.displayType : null,
+      shape: up ? h.type : null,       // 真實外型(蛋/石頭/吐司的形狀),偽裝不會改變這個
+      color: up ? h.displayType : null, // 顯示顏色,偽裝時會跟shape不一樣
     };
     if (role === 'defender') {
       const isPending = room.pendingSet.has(i);
@@ -248,6 +249,7 @@ function retract(room, idx) {
     if (!room.activeSet.has(idx)) {
       room.holes[idx].type = null;
       room.holes[idx].displayType = null;
+      room.holes[idx].resolved = false;
     }
   }, 200);
 }
@@ -256,10 +258,10 @@ function retract(room, idx) {
 function resolveHoleClick(room, idx) {
   if (room.phase !== 'playing') return;
   const h = room.holes[idx];
-  if (!h.type) return; // 點空的,沒獎懲
+  if (!h.type || h.resolved) return; // 點空的或已經判定過,沒獎懲
 
-  const type = h.type;
-  h.type = null;
+  h.resolved = true; // 標記已判定,避免同一個洞在收回動畫期間被重複計分
+  const type = h.type; // 真實種類,先不清空 h.type,畫面渲染(外型)還要用到,等 retract 才清
   clearTimeout(room.holeTimers[idx].retract);
 
   if (type === 'egg') {
@@ -276,12 +278,14 @@ function resolveHoleClick(room, idx) {
     room.scoreAttacker += gained;
     room.meter += METER_EGG_HIT;
     pushEvent(room, 'attacker', { kind: 'float', idx, text: '+' + gained, good: gained > 0 });
+    pushEvent(room, 'defender', { kind: 'hit', idx });
   } else if (type === 'toast') {
     const delta = Math.random() < 0.5 ? 1 : -1;
     room.scoreModDelta = delta;
     room.scoreModUntil = Date.now() + TOAST_MOD_DURATION;
     room.meter += METER_TOAST_HIT;
     pushEvent(room, 'attacker', { kind: 'float', idx, text: delta > 0 ? 'BUFF +1倍(3秒)' : 'DEBUFF -1倍(3秒)', good: delta > 0 });
+    pushEvent(room, 'defender', { kind: 'hit', idx });
   } else if (type === 'stone') {
     let penalty;
     if (room.comboActive) {
@@ -294,6 +298,7 @@ function resolveHoleClick(room, idx) {
     }
     room.meter -= METER_STONE_PENALTY;
     pushEvent(room, 'attacker', { kind: 'float', idx, text: '-' + penalty, good: false });
+    pushEvent(room, 'defender', { kind: 'hit', idx });
   }
 
   setTimeout(() => retract(room, idx), 130);
