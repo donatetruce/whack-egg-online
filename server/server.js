@@ -398,6 +398,11 @@ wss.on('connection', (ws) => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
+    if (msg.type === 'ping') {
+      send(ws, { type: 'pong', t: msg.t });
+      return;
+    }
+
     if (msg.type === 'create_room') {
       const role = msg.role === 'defender' ? 'defender' : 'attacker';
       const room = createRoom();
