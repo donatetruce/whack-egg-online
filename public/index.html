@@ -711,7 +711,7 @@
     (s.events || []).forEach(e => {
       if (!holes[e.idx]) return;
       if (e.kind === 'float') {
-        floatText(holes[e.idx], e.text, e.good);
+        floatText(holes[e.idx].el, e.text, e.good);
         holes[e.idx].el.classList.add('hit');
         setTimeout(() => holes[e.idx].el.classList.remove('hit'), 150);
       } else if (e.kind === 'hit') {
