@@ -423,14 +423,29 @@
     if (ws && ws.readyState === WebSocket.OPEN) { onOpenCb(); return; }
     connBadge('連線中...');
     ws = new WebSocket(SERVER_URL);
-    ws.addEventListener('open', () => { connBadge('已連線'); onOpenCb(); });
-    ws.addEventListener('close', () => { connBadge('連線中斷'); });
+    ws.addEventListener('open', () => { updateConnBadge(); onOpenCb(); });
+    ws.addEventListener('close', () => { lastPing = null; connBadge('連線中斷'); clearInterval(pingTimer); });
     ws.addEventListener('error', () => { connBadge('連線錯誤'); });
     ws.addEventListener('message', (ev) => {
       let msg;
       try { msg = JSON.parse(ev.data); } catch { return; }
+      if (msg.type === 'pong') {
+        const rtt = Date.now() - msg.t;
+        lastPing = rtt;
+        updateConnBadge();
+        return;
+      }
       handleMessage(msg);
     });
+    clearInterval(pingTimer);
+    pingTimer = setInterval(() => sendMsg({ type: 'ping', t: Date.now() }), 2000);
+  }
+
+  let lastPing = null;
+  let pingTimer = null;
+  function updateConnBadge() {
+    const base = (ws && ws.readyState === WebSocket.OPEN) ? '已連線' : '連線中斷';
+    el('connBadge').textContent = base + (lastPing !== null ? ' · 延遲 ' + lastPing + 'ms' : '');
   }
 
   function sendMsg(obj) {
