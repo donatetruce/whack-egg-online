@@ -403,6 +403,19 @@
 (function(){
   const HOLE_COUNT = 9;
 
+  // ---------- 診斷用:全域點擊偵測(捕獲階段,任何點擊都會先經過這裡) ----------
+  document.addEventListener('click', function(e) {
+    console.log('[文件層級偵測到點擊]', 'target=' + e.target.tagName + '.' + (e.target.className || ''), 'x=' + e.clientX, 'y=' + e.clientY, '時間=' + new Date().toISOString());
+  }, true);
+
+  // ---------- 診斷用:全域錯誤攔截 ----------
+  window.addEventListener('error', function(e) {
+    console.log('[全域錯誤]', e.message, 'at', e.filename + ':' + e.lineno);
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    console.log('[未處理的Promise錯誤]', e.reason);
+  });
+
   // 伺服器網址:同一個Render服務同時放前端+WebSocket時,預設抓同一個網址就好。
   // 如果之後把這個檔案另外放到 itch.io,把下面這行改成你的 Render 網址,
   // 例如:const DEFAULT_SERVER_URL = 'wss://your-app-name.onrender.com';
