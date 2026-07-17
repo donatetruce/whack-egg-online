@@ -120,6 +120,7 @@ function buildHolesView(room, role) {
       up,
       shape: up ? h.type : null,       // 真實外型(蛋/石頭/吐司的形狀),偽裝不會改變這個
       color: up ? h.displayType : null, // 顯示顏色,偽裝時會跟shape不一樣
+      resolved: up ? !!h.resolved : false, // 已經被判定過、正在等收回,前端用這個持續顯示縮小動畫
     };
     if (role === 'defender') {
       const isPending = room.pendingSet.has(i);
@@ -233,6 +234,7 @@ function revealPendingSpawn(room, idx) {
   const trueType = p.trueType;
   h.type = trueType; // 計分永遠用真實種類
   h.displayType = p.disguised ? p.displayType : trueType; // 攻擊方看到的是「顯示顏色」,可能被偽裝
+  h.resolved = false; // 新的一輪,重設判定狀態,避免舊狀態殘留
   room.activeSet.add(idx);
 
   const prog = difficultyProgress(room);
