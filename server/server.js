@@ -435,6 +435,13 @@ wss.on('connection', (ws) => {
 
     if (msg.type === 'click_hole') {
       const idx = msg.idx | 0;
+      const h = (idx >= 0 && idx < HOLE_COUNT) ? room.holes[idx] : null;
+      send(ws, {
+        type: 'debug_click',
+        idx, myRoleOnServer: ws.role, roomPhase: room.phase,
+        holeType: h ? h.type : null, holeResolved: h ? h.resolved : null,
+        disguiseAiming: room.disguiseAiming,
+      });
       if (idx < 0 || idx >= HOLE_COUNT) return;
       if (ws.role === 'attacker') {
         resolveHoleClick(room, idx);
