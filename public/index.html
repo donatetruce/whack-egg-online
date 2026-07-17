@@ -537,7 +537,7 @@
         sendMsg({ type: 'click_hole', idx: i });
       });
       board.appendChild(hole);
-      holes.push({ el: hole, critterEl: critter, ghostEl: ghost });
+      holes.push({ el: hole, critterEl: critter, ghostEl: ghost, lastShape: null, lastColorAs: null, lastPreviewType: null });
     }
   }
 
@@ -666,17 +666,32 @@
       if (hv.up && hv.shape) {
         // 外型(shape)永遠是真實種類,顏色(color)才會因偽裝而不同——兩者分開套用
         const colorAs = (hv.color && hv.color !== hv.shape) ? hv.color : null;
-        h.critterEl.innerHTML = critterHTML(hv.shape, colorAs);
+        // 只有內容真的變了才重寫innerHTML,避免每100ms的狀態更新把滑鼠正按著的元素整個換掉導致點擊被吃掉
+        if (h.lastShape !== hv.shape || h.lastColorAs !== colorAs) {
+          h.critterEl.innerHTML = critterHTML(hv.shape, colorAs);
+          h.lastShape = hv.shape;
+          h.lastColorAs = colorAs;
+        }
       } else if (!hv.up) {
-        h.critterEl.innerHTML = '';
+        if (h.lastShape !== null) {
+          h.critterEl.innerHTML = '';
+          h.lastShape = null;
+          h.lastColorAs = null;
+        }
       }
       if (myRole === 'defender') {
         if (hv.previewType) {
           h.el.classList.add('preview');
-          h.ghostEl.innerHTML = critterHTML(hv.previewType);
+          if (h.lastPreviewType !== hv.previewType) {
+            h.ghostEl.innerHTML = critterHTML(hv.previewType);
+            h.lastPreviewType = hv.previewType;
+          }
         } else {
           h.el.classList.remove('preview');
-          h.ghostEl.innerHTML = '';
+          if (h.lastPreviewType !== null) {
+            h.ghostEl.innerHTML = '';
+            h.lastPreviewType = null;
+          }
         }
         h.el.classList.toggle('aim-target', !!hv.aimTarget);
       }
