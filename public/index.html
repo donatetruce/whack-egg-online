@@ -442,6 +442,10 @@
         updateConnBadge();
         return;
       }
+      if (msg.type === 'debug_click') {
+        console.log('[伺服器回報]', JSON.stringify(msg));
+        return;
+      }
       handleMessage(msg);
     });
     clearInterval(pingTimer);
@@ -515,7 +519,10 @@
       ghost.className = 'preview-ghost';
       hole.appendChild(critter);
       hole.appendChild(ghost);
-      hole.addEventListener('click', () => sendMsg({ type: 'click_hole', idx: i }));
+      hole.addEventListener('click', () => {
+        console.log('[送出點擊] idx=' + i + ' 目前myRole=' + myRole + ' 時間=' + new Date().toISOString());
+        sendMsg({ type: 'click_hole', idx: i });
+      });
       board.appendChild(hole);
       holes.push({ el: hole, critterEl: critter, ghostEl: ghost });
     }
