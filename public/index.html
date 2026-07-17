@@ -658,6 +658,10 @@
   }
 
   function renderState(s) {
+    // 每次收到新狀態,先清掉上一輪的「打中閃一下」效果,等下面事件重新判斷要不要加回去
+    // (不再用固定時間的計時器,改成跟著伺服器的更新節奏走,避免兩邊時間對不齊造成蛋彈回來的抖動)
+    holes.forEach(h => h.el.classList.remove('hit'));
+
     // 棋盤
     s.holes.forEach((hv, i) => {
       const h = holes[i];
@@ -770,10 +774,8 @@
       if (e.kind === 'float') {
         floatText(holes[e.idx].el, e.text, e.good);
         holes[e.idx].el.classList.add('hit');
-        setTimeout(() => holes[e.idx].el.classList.remove('hit'), 150);
       } else if (e.kind === 'hit') {
         holes[e.idx].el.classList.add('hit');
-        setTimeout(() => holes[e.idx].el.classList.remove('hit'), 150);
       }
     });
   }
