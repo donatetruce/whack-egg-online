@@ -658,15 +658,14 @@
   }
 
   function renderState(s) {
-    // 每次收到新狀態,先清掉上一輪的「打中閃一下」效果,等下面事件重新判斷要不要加回去
-    // (不再用固定時間的計時器,改成跟著伺服器的更新節奏走,避免兩邊時間對不齊造成蛋彈回來的抖動)
-    holes.forEach(h => h.el.classList.remove('hit'));
-
     // 棋盤
     s.holes.forEach((hv, i) => {
       const h = holes[i];
       if (!h) return;
       h.el.classList.toggle('up', hv.up);
+      // 只要伺服器說這格「已經判定過、正在等收回」,就持續顯示縮小效果,直到up變false為止
+      // (不用一次性事件觸發,避免特效撐的時間跟伺服器實際收回的時間對不上,造成蛋彈回來的抖動)
+      h.el.classList.toggle('hit', hv.up && !!hv.resolved);
       if (hv.up && hv.shape) {
         // 外型(shape)永遠是真實種類,顏色(color)才會因偽裝而不同——兩者分開套用
         const colorAs = (hv.color && hv.color !== hv.shape) ? hv.color : null;
@@ -768,14 +767,11 @@
       }
     }
 
-    // 事件:浮動分數文字只有攻擊方會收到;防守方只收到「被打中」的動畫提示,不含分數數字
+    // 事件:浮動分數文字只有攻擊方會收到(縮小動畫現在由上面的resolved狀態自動持續套用,這裡不用再另外加了)
     (s.events || []).forEach(e => {
       if (!holes[e.idx]) return;
       if (e.kind === 'float') {
         floatText(holes[e.idx].el, e.text, e.good);
-        holes[e.idx].el.classList.add('hit');
-      } else if (e.kind === 'hit') {
-        holes[e.idx].el.classList.add('hit');
       }
     });
   }
