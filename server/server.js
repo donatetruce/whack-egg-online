@@ -42,7 +42,7 @@ function difficultyProgress(room) {
 }
 
 // ---------- 房間代碼 ----------
-const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 避開易混淆字元 0/O 1/I
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // 純英文字母,避開容易混淆的 I/O,手機輸入不用切數字鍵盤
 function makeRoomCode() {
   let s = '';
   for (let i = 0; i < 4; i++) s += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
